@@ -1,0 +1,336 @@
+version: '3'
+
+# FamZoo Payer - Task Runner Configuration
+# This Taskfile provides streamlined commands for building, testing, and developing the FamZoo Payer iOS Messages Extension
+
+vars:
+  PROJECT_NAME: "FamZoo Payer"
+  SCHEME_EXTENSION: "FamZoo Payer MessagesExtension"
+  SCHEME_MAIN: "FamZoo Payer"
+  SIMULATOR_DEVICE: "iPhone 16"
+  SIMULATOR_OS: "iOS Simulator"
+  BUILD_CONFIG_DEBUG: "Debug"
+  BUILD_CONFIG_RELEASE: "Release"
+  XCODE_PROJECT: "FamZoo Payer.xcodeproj"
+
+tasks:
+  # === BUILDING ===
+  
+  build:
+    desc: "Build Messages Extension for iOS Simulator (most common)"
+    cmds:
+      - xcodebuild -project "{{.XCODE_PROJECT}}" -scheme "{{.SCHEME_EXTENSION}}" -destination "platform={{.SIMULATOR_OS}},name={{.SIMULATOR_DEVICE}}" build
+    sources:
+      - "FamZoo Payer MessagesExtension/**/*.swift"
+      - "FamZoo Payer MessagesExtension/**/*.storyboard"
+      - "FamZoo Payer MessagesExtension/**/*.plist"
+    generates:
+      - "DerivedData/**/*.appex"
+
+  build:main:
+    desc: "Build main app target (includes extension)"
+    cmds:
+      - xcodebuild -project "{{.XCODE_PROJECT}}" -scheme "{{.SCHEME_MAIN}}" -destination "platform={{.SIMULATOR_OS}},name={{.SIMULATOR_DEVICE}}" build
+
+  build:device:
+    desc: "Build Messages Extension for device"
+    cmds:
+      - xcodebuild -project "{{.XCODE_PROJECT}}" -scheme "{{.SCHEME_EXTENSION}}" -destination "generic/platform=iOS" build
+
+  build:release:
+    desc: "Build Messages Extension in Release configuration"
+    cmds:
+      - xcodebuild -project "{{.XCODE_PROJECT}}" -scheme "{{.SCHEME_EXTENSION}}" -destination "platform={{.SIMULATOR_OS}},name={{.SIMULATOR_DEVICE}}" -configuration "{{.BUILD_CONFIG_RELEASE}}" build
+
+  build:verbose:
+    desc: "Build with detailed output for debugging build issues"
+    cmds:
+      - xcodebuild -project "{{.XCODE_PROJECT}}" -scheme "{{.SCHEME_EXTENSION}}" -destination "platform={{.SIMULATOR_OS}},name={{.SIMULATOR_DEVICE}}" build -verbose
+
+  build:archive:
+    desc: "Create archive for App Store distribution"
+    cmds:
+      - xcodebuild -project "{{.XCODE_PROJECT}}" -scheme "{{.SCHEME_MAIN}}" -configuration "{{.BUILD_CONFIG_RELEASE}}" archive -archivePath "build/{{.PROJECT_NAME}}.xcarchive"
+
+  # === CLEANING ===
+
+  clean:
+    desc: "Clean build artifacts"
+    cmds:
+      - xcodebuild -project "{{.XCODE_PROJECT}}" -scheme "{{.SCHEME_EXTENSION}}" clean
+      - rm -rf build/
+      - rm -rf DerivedData/
+
+  clean:deep:
+    desc: "Deep clean including Xcode caches"
+    cmds:
+      - task: clean
+      - rm -rf ~/Library/Developer/Xcode/DerivedData/{{.PROJECT_NAME}}-*
+      - rm -rf ~/Library/Caches/com.apple.dt.Xcode/
+
+  # === ANALYSIS ===
+
+  analyze:
+    desc: "Run static code analysis"
+    cmds:
+      - xcodebuild -project "{{.XCODE_PROJECT}}" -scheme "{{.SCHEME_EXTENSION}}" analyze
+
+  lint:
+    desc: "Run SwiftLint (if installed)"
+    cmds:
+      - |
+        if command -v swiftlint >/dev/null 2>&1; then
+          swiftlint
+        else
+          echo "SwiftLint not installed. Install with: brew install swiftlint"
+        fi
+
+  # === TESTING ===
+
+  test:
+    desc: "Run unit tests"
+    cmds:
+      - xcodebuild -project "{{.XCODE_PROJECT}}" -scheme "{{.SCHEME_EXTENSION}}" -destination "platform={{.SIMULATOR_OS}},name={{.SIMULATOR_DEVICE}}" test
+
+  test:parser:
+    desc: "Test command parsing functionality"
+    cmds:
+      - echo "Testing command parser..."
+      - xcodebuild -project "{{.XCODE_PROJECT}}" -scheme "{{.SCHEME_EXTENSION}}" -destination "platform={{.SIMULATOR_OS}},name={{.SIMULATOR_DEVICE}}" test -only-testing:FamZooPayerTests/CommandParserTests
+
+  test:abbreviations:
+    desc: "Test abbreviation expansion"
+    cmds:
+      - echo "Testing abbreviation expansion..."
+      - xcodebuild -project "{{.XCODE_PROJECT}}" -scheme "{{.SCHEME_EXTENSION}}" -destination "platform={{.SIMULATOR_OS}},name={{.SIMULATOR_DEVICE}}" test -only-testing:FamZooPayerTests/AbbreviationExpanderTests
+
+  test:api:
+    desc: "Test API connectivity and error handling"
+    cmds:
+      - echo "Testing API integration..."
+      - xcodebuild -project "{{.XCODE_PROJECT}}" -scheme "{{.SCHEME_EXTENSION}}" -destination "platform={{.SIMULATOR_OS}},name={{.SIMULATOR_DEVICE}}" test -only-testing:FamZooPayerTests/FamZooAPIClientTests
+
+  test:all:
+    desc: "Run complete test suite"
+    cmds:
+      - task: lint
+      - task: analyze
+      - task: test
+
+  # === DEVELOPMENT UTILITIES ===
+
+  dev:info:
+    desc: "Show project information"
+    cmds:
+      - echo "=== FamZoo Payer Project Information ==="
+      - echo "Project - {{.XCODE_PROJECT}}"
+      - echo "Main Scheme - {{.SCHEME_MAIN}}"
+      - echo "Extension Scheme - {{.SCHEME_EXTENSION}}"
+      - echo "Target Device - {{.SIMULATOR_DEVICE}}"
+      - echo ""
+      - xcodebuild -project "{{.XCODE_PROJECT}}" -list
+
+  dev:schemes:
+    desc: "List all available Xcode schemes"
+    cmds:
+      - xcodebuild -project "{{.XCODE_PROJECT}}" -list
+
+  dev:simulators:
+    desc: "List available iOS simulators"
+    cmds:
+      - xcrun simctl list devices iOS
+
+  dev:reset-simulator:
+    desc: "Reset iOS Simulator to clean state"
+    cmds:
+      - xcrun simctl shutdown booted || true
+      - xcrun simctl erase all
+
+  dev:reset-xcode:
+    desc: "Reset Xcode derived data and caches"
+    cmds:
+      - task: clean:deep
+      - echo "Xcode caches cleared. Restart Xcode for full effect."
+
+  dev:open:
+    desc: "Open project in Xcode"
+    cmds:
+      - open "{{.XCODE_PROJECT}}"
+
+  # === DEBUGGING ===
+
+  debug:build-errors:
+    desc: "Show detailed build errors"
+    cmds:
+      - xcodebuild -project "{{.XCODE_PROJECT}}" -scheme "{{.SCHEME_EXTENSION}}" -destination "platform={{.SIMULATOR_OS}},name={{.SIMULATOR_DEVICE}}" build 2>&1 | grep -A 10 -B 5 "error:"
+
+  debug:abbreviations:
+    desc: "Debug abbreviation expansion for a specific command"
+    cmds:
+      - |
+        if [ -z "{{.CLI_ARGS}}" ]; then
+          echo "Usage: task debug:abbreviations -- 'command to test'"
+          echo "Example: task debug:abbreviations -- 'a b'"
+        else
+          echo "Testing abbreviation expansion for: {{.CLI_ARGS}}"
+          # This would require a debug build of the app with command-line testing support
+          echo "Note: Requires debug build with CLI testing support"
+        fi
+
+  debug:parameters:
+    desc: "Debug parameter parsing for a specific command"
+    cmds:
+      - |
+        if [ -z "{{.CLI_ARGS}}" ]; then
+          echo "Usage: task debug:parameters -- 'command to test'"
+          echo "Example: task debug:parameters -- 'credit \$25 to Sarah'"
+        else
+          echo "Testing parameter parsing for: {{.CLI_ARGS}}"
+          echo "Note: Requires debug build with CLI testing support"
+        fi
+
+  debug:network:
+    desc: "Monitor network requests (requires Charles Proxy or similar)"
+    cmds:
+      - echo "Network monitoring requires external tools like Charles Proxy"
+      - echo "Configure proxy settings in iOS Simulator > Settings > Wi-Fi > Configure Proxy"
+
+  # === MESSAGES EXTENSION SPECIFIC ===
+
+  messages:install:
+    desc: "Build and install Messages Extension for testing"
+    cmds:
+      - task: build:main
+      - echo "Messages Extension installed. Open Messages app to test."
+
+  messages:test-guide:
+    desc: "Show guide for testing Messages Extensions"
+    cmds:
+      - echo "=== Testing Messages Extensions ==="
+      - echo "1. Run - task messages:install"
+      - echo "2. Open Messages app in iOS Simulator"
+      - echo "3. Create or open a conversation"
+      - echo "4. Tap the App Store icon (⊕) next to text field"
+      - echo "5. Find 'FamZoo Payer' in app drawer"
+      - echo "6. Test both compact and expanded modes"
+      - echo ""
+      - echo "Note - Messages Extensions only work within Messages app context"
+
+  # === RELEASE PREPARATION ===
+
+  release:prepare:
+    desc: "Prepare release build with all checks"
+    cmds:
+      - echo "Preparing release build..."
+      - task: clean
+      - task: test:all
+      - task: build:release
+      - echo "Release build prepared successfully!"
+
+  release:export:
+    desc: "Export IPA for distribution"
+    cmds:
+      - task: build:archive
+      - xcodebuild -exportArchive -archivePath "build/{{.PROJECT_NAME}}.xcarchive" -exportPath "build/" -exportOptionsPlist "ExportOptions.plist"
+
+  # === DOCUMENTATION ===
+
+  docs:generate:
+    desc: "Generate documentation"
+    cmds:
+      - |
+        if command -v sourcedocs >/dev/null 2>&1; then
+          sourcedocs generate --spm-module FamZooPayerMessagesExtension --output-folder docs/
+        else
+          echo "SourceDocs not installed. Install with: brew install sourcedocs"
+        fi
+
+  docs:serve:
+    desc: "Serve documentation locally"
+    cmds:
+      - |
+        if [ -d "docs/" ]; then
+          python3 -m http.server 8000 --directory docs/
+        else
+          echo "No docs directory found. Run 'task docs:generate' first."
+        fi
+
+  # === UTILITIES ===
+
+  install-deps:
+    desc: "Install development dependencies"
+    cmds:
+      - |
+        echo "Installing development dependencies..."
+        if ! command -v brew >/dev/null 2>&1; then
+          echo "Homebrew not found. Please install Homebrew first."
+          exit 1
+        fi
+        
+        # Optional tools for enhanced development experience
+        brew list swiftlint >/dev/null 2>&1 || brew install swiftlint
+        brew list sourcedocs >/dev/null 2>&1 || brew install sourcedocs
+        
+        echo "Development dependencies installed!"
+
+  version:
+    desc: "Show version information"
+    cmds:
+      - echo "=== FamZoo Payer Version Information ==="
+      - xcodebuild -version
+      - swift --version
+      - echo ""
+      - echo "Project - {{.PROJECT_NAME}}"
+      - |
+        if [ -f "FamZoo Payer MessagesExtension/Info.plist" ]; then
+          echo "Bundle Version - $(plutil -p 'FamZoo Payer MessagesExtension/Info.plist' | grep CFBundleVersion | awk '{print $3}' | tr -d '"')"
+        fi
+
+  # === HELP ===
+
+  help:
+    desc: "Show detailed help for common tasks"
+    cmds:
+      - echo "=== FamZoo Payer Development Tasks ==="
+      - echo ""
+      - echo "BUILDING:"
+      - echo "  task build              # Build Messages Extension (most common)"
+      - echo "  task build:main         # Build main app target"
+      - echo "  task build:device       # Build for device"
+      - echo "  task build:release      # Release build"
+      - echo ""
+      - echo "TESTING:"
+      - echo "  task test:all           # Complete test suite"
+      - echo "  task messages:install   # Install for Messages testing"
+      - echo "  task messages:test-guide # Show testing instructions"
+      - echo ""
+      - echo "DEVELOPMENT:"
+      - echo "  task dev:info           # Project information"
+      - echo "  task dev:open           # Open in Xcode"
+      - echo "  task clean              # Clean build"
+      - echo ""
+      - echo "Run 'task --list' to see all available tasks"
+
+  default:
+    desc: "Show help by default"
+    cmds:
+      - |
+        echo "=== FamZoo Payer Development Tasks ==="
+        echo ""
+        echo "BUILDING:"
+        echo "  task build              # Build Messages Extension (most common)"
+        echo "  task build:main         # Build main app target"
+        echo "  task build:device       # Build for device"
+        echo "  task build:release      # Release build"
+        echo ""
+        echo "TESTING:"
+        echo "  task test:all           # Complete test suite"
+        echo "  task messages:install   # Install for Messages testing"
+        echo "  task messages:test-guide # Show testing instructions"
+        echo ""
+        echo "DEVELOPMENT:"
+        echo "  task dev:info           # Project information"
+        echo "  task dev:open           # Open in Xcode"
+        echo "  task clean              # Clean build"
+        echo ""
+        echo "Run 'task --list' to see all available tasks"

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Scheme
+   LastUpgradeVersion="1640"
+   version="1.3">
+   <BuildAction parallelizeBuildables="YES" buildImplicitDependencies="YES">
+      <BuildActionEntries>
+         <BuildActionEntry buildForTesting="YES" buildForRunning="YES" buildForProfiling="YES" buildForArchiving="YES" buildForAnalyzing="YES">
+            <BuildableReference
+               BuildableIdentifier="primary"
+               BlueprintIdentifier="039A39D02DFDE88D009BFEE2"
+               BuildableName="FamZoo Payer MessagesExtension.appex"
+               BlueprintName="FamZoo Payer MessagesExtension"
+               ReferencedContainer="container:FamZoo Payer.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+      </BuildActionEntries>
+   </BuildAction>
+   <TestAction buildConfiguration="Debug" selectedDebuggerIdentifier="Xcode.DebuggerFoundation.Debugger.LLDB" selectedLauncherIdentifier="Xcode.DebuggerFoundation.Launcher.LLDB" shouldUseLaunchSchemeArgsEnv="YES" codeCoverageEnabled="NO">
+      <Testables>
+      </Testables>
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier="primary"
+            BlueprintIdentifier="039A39D02DFDE88D009BFEE2"
+            BuildableName="FamZoo Payer MessagesExtension.appex"
+            BlueprintName="FamZoo Payer MessagesExtension"
+            ReferencedContainer="container:FamZoo Payer.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
+      <AdditionalOptions>
+      </AdditionalOptions>
+   </TestAction>
+   <LaunchAction buildConfiguration="Debug" selectedDebuggerIdentifier="Xcode.DebuggerFoundation.Debugger.LLDB" selectedLauncherIdentifier="Xcode.DebuggerFoundation.Launcher.LLDB" launchStyle="0" useCustomWorkingDirectory="NO" ignoresPersistentStateOnLaunch="NO" debugDocumentVersioning="YES" debugServiceExtension="internal" allowLocationSimulation="YES">
+      <BuildableProductRunnable>
+         <BuildableReference
+            BuildableIdentifier="primary"
+            BlueprintIdentifier="039A39D02DFDE88D009BFEE2"
+            BuildableName="FamZoo Payer MessagesExtension.appex"
+            BlueprintName="FamZoo Payer MessagesExtension"
+            ReferencedContainer="container:FamZoo Payer.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
+      <AdditionalOptions>
+      </AdditionalOptions>
+   </LaunchAction>
+   <ProfileAction buildConfiguration="Release" shouldUseLaunchSchemeArgsEnv="YES" savedToolIdentifier="" useCustomWorkingDirectory="NO" debugDocumentVersioning="YES">
+      <BuildableProductRunnable>
+         <BuildableReference
+            BuildableIdentifier="primary"
+            BlueprintIdentifier="039A39D02DFDE88D009BFEE2"
+            BuildableName="FamZoo Payer MessagesExtension.appex"
+            BlueprintName="FamZoo Payer MessagesExtension"
+            ReferencedContainer="container:FamZoo Payer.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
+   </ProfileAction>
+   <AnalyzeAction buildConfiguration="Debug"/>
+   <ArchiveAction buildConfiguration="Release" revealArchiveInOrganizer="YES"/>
+</Scheme>

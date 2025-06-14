@@ -6,7 +6,11 @@
       "Bash(timeout 30 xcodebuild:*)",
       "Bash(timeout 60 xcodebuild:*)",
       "Bash(rm:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(sed:*)",
+      "Bash(python3:*)",
+      "Bash(task:*)",
+      "Bash(/dev/null)"
     ],
     "deny": []
   }

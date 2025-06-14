@@ -64,7 +64,7 @@ protocol CommandResponse {
     var message: String { get }
     var data: [String: Any]? { get }
     
-    func displayView() -> UIView
+    @MainActor func displayView() -> UIView
 }
 
 struct BasicCommandResponse: CommandResponse {
@@ -72,7 +72,7 @@ struct BasicCommandResponse: CommandResponse {
     let message: String
     let data: [String: Any]?
     
-    func displayView() -> UIView {
+    @MainActor func displayView() -> UIView {
         let label = UILabel()
         label.text = message
         label.numberOfLines = 0
@@ -118,7 +118,7 @@ struct AccountBalanceResponse: CommandResponse, Codable {
         try container.encode(accountName, forKey: .accountName)
     }
     
-    func displayView() -> UIView {
+    @MainActor func displayView() -> UIView {
         let stackView = UIStackView()
         stackView.axis = .vertical
         stackView.alignment = .center
