@@ -180,60 +180,73 @@ class MessagesViewController: MSMessagesAppViewController {
         // Validate command first
         let validation = command.validate()
         guard validation.isValid else {
-            await handleCommandError(ValidationError.invalidParameterFormat("Command validation failed"))
+            handleCommandError(ValidationError.invalidParameterFormat("Command validation failed"))
             return
         }
         
         do {
             // Show loading state
-            await showLoadingState()
+            showLoadingState()
             
             // Execute the command
             let result = try await command.execute()
             
             // Hide loading state
-            await hideLoadingState()
+            hideLoadingState()
             
             // Send result message
             try await messageSender.sendCommandResult(command, result: result)
             
             // Update UI with result
-            await updateUIWithResult(result)
+            updateUIWithResult(result)
             
         } catch {
-            await hideLoadingState()
-            await handleCommandError(error)
+            hideLoadingState()
+            handleCommandError(error)
         }
     }
     
     @MainActor
+    private func updateAllViewControllers(_ action: (UIViewController) -> Void) {
+        compactViewController.map(action)
+        expandedViewController.map(action)
+    }
+    
+    @MainActor
     private func showLoadingState() {
-        // Update UI to show loading
-        compactViewController?.showLoading()
-        expandedViewController?.showLoading()
+        updateAllViewControllers { vc in
+            if let loadingVC = vc as? LoadingCapable {
+                loadingVC.showLoading()
+            }
+        }
     }
     
     @MainActor
     private func hideLoadingState() {
-        // Hide loading UI
-        compactViewController?.hideLoading()
-        expandedViewController?.hideLoading()
+        updateAllViewControllers { vc in
+            if let loadingVC = vc as? LoadingCapable {
+                loadingVC.hideLoading()
+            }
+        }
     }
     
     @MainActor
     private func updateUIWithResult(_ result: CommandResponse) {
-        // Update UI with command result
-        compactViewController?.updateWithResult(result)
-        expandedViewController?.updateWithResult(result)
+        updateAllViewControllers { vc in
+            if let resultVC = vc as? ResultCapable {
+                resultVC.updateWithResult(result)
+            }
+        }
     }
     
     @MainActor
     private func handleCommandError(_ error: Error) {
-        // Show error in UI
-        compactViewController?.showError(error)
-        expandedViewController?.showError(error)
+        updateAllViewControllers { vc in
+            if let errorVC = vc as? ErrorCapable {
+                errorVC.showError(error)
+            }
+        }
         
-        // Send error message
         Task {
             try? await messageSender.sendErrorMessage(error)
         }
@@ -243,7 +256,7 @@ class MessagesViewController: MSMessagesAppViewController {
     
     private func checkAuthenticationStatus() async {
         do {
-            let hasToken = try await keychain.hasValidAuthToken()
+            let hasToken = try keychain.hasValidAuthToken()
             if !hasToken {
                 await promptForAuthentication()
             }
@@ -299,12 +312,10 @@ class MessagesViewController: MSMessagesAppViewController {
     // MARK: - State Management
     
     private func saveCurrentState() {
-        // Save current command and UI state
         UserDefaults.standard.set(currentCommand?.rawText, forKey: "currentCommand")
     }
     
     private func restoreState() {
-        // Restore previous state if available
         if let commandText = UserDefaults.standard.string(forKey: "currentCommand") {
             currentCommand = commandParser.parse(commandText)
         }
@@ -312,8 +323,11 @@ class MessagesViewController: MSMessagesAppViewController {
     
     private func resetUI() {
         currentCommand = nil
-        compactViewController?.reset()
-        expandedViewController?.reset()
+        updateAllViewControllers { vc in
+            if let resetVC = vc as? ResetCapable {
+                resetVC.reset()
+            }
+        }
     }
 }
 
@@ -350,6 +364,25 @@ extension MessagesViewController: CommandBuilderDelegate {
     func commandBuilderDidRequestCompact() {
         requestPresentationStyle(.compact)
     }
+}
+
+// MARK: - UI Capability Protocols
+
+protocol LoadingCapable {
+    func showLoading()
+    func hideLoading()
+}
+
+protocol ResultCapable {
+    func updateWithResult(_ result: CommandResponse)
+}
+
+protocol ErrorCapable {
+    func showError(_ error: Error)
+}
+
+protocol ResetCapable {
+    func reset()
 }
 
 // MARK: - Delegate Protocols
