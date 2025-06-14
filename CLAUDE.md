@@ -36,6 +36,12 @@ Messages Extensions can only be tested within the Messages app:
 ```bash
 # Code analysis
 xcodebuild -project "FamZoo Payer.xcodeproj" -scheme "FamZoo Payer" analyze
+
+# Clean build (useful after file deletions)
+xcodebuild -project "FamZoo Payer.xcodeproj" -scheme "FamZoo Payer MessagesExtension" clean
+
+# Show detailed build errors
+xcodebuild -project "FamZoo Payer.xcodeproj" -scheme "FamZoo Payer MessagesExtension" -destination "platform=iOS Simulator,name=iPhone 16" build 2>&1 | grep -A 10 -B 5 "error:"
 ```
 
 ## Core Architecture
@@ -55,20 +61,15 @@ The app implements a sophisticated natural language command parser:
 - **ValidationResult**: Comprehensive validation with specific error types
 
 ### Messages Extension Architecture
-The app supports dual presentation modes:
+The app supports dual presentation modes with a single controller implementation:
 
-**Compact Mode**: Quick action buttons for common commands
-**Expanded Mode**: Full command builder with text input and templates
+**Compact Mode**: 4 quick action buttons (Balance, Credit, Debit, More)
+**Expanded Mode**: Adds text input field for command entry
 
-**Entry Points:**
-- `WorkingMessagesViewController` - Current functional implementation
-- `MessagesViewController` - Advanced implementation (may have compilation issues)
-- Multiple test controllers available for different complexity levels
-
-### UI Controller Hierarchy
-- **QuickActionsViewController** - Compact mode interface with preset buttons
-- **CommandBuilderViewController** - Expanded mode with text input and suggestions
-- **MessageSender** - Handles iMessage integration and URL scheme encoding
+**Current Implementation:**
+- `WorkingMessagesViewController` - Primary controller handling both presentation modes
+- `MessageSender` - Handles iMessage integration and URL scheme encoding
+- `CommonUIComponents` - Reusable UI components (LoadingView, ErrorView, ResultView)
 
 ### Data Models
 - **Account**: FamZoo account with balance, type (spending/savings/parent), permissions
@@ -77,7 +78,7 @@ The app supports dual presentation modes:
 
 ### Networking Layer
 - **FamZooAPIClient** - RESTful API client with retry logic and authentication
-- **KeychainManager** - Secure credential storage with biometric support
+- **KeychainManager** - Secure credential storage with biometric support (uses synchronous Security framework calls)
 - **NetworkError** - Comprehensive error handling with retry strategies
 
 ## Configuration Details
@@ -92,13 +93,15 @@ The app supports dual presentation modes:
 
 ### Command Creation Pattern
 ```swift
-// Commands implement FamZooCommand protocol
-let command = ConcreteCommand(
+// Simple commands for basic functionality
+let command = SimpleCommand(
     type: .account,
     action: .balance,
-    parameters: [],
     rawText: "account balance"
 )
+
+// Full commands use the protocol (parsed via CommandParser)
+let parsedCommand = CommandParser().parse("account balance")
 ```
 
 ### Messages Extension Lifecycle
@@ -119,9 +122,22 @@ Supports quoted strings, flags, and typed parameters:
 - Dates: `today`, `tomorrow`, `2024-01-15`, relative dates
 - Flags: `--urgent`, `-f`, boolean parameters
 
-## Messages Extension Notes
+## Current Implementation Status
 
+### Working Components
+- **Command Parsing System**: Full implementation with abbreviation expansion and parameter extraction
+- **API Client**: Complete REST client with authentication and retry logic
+- **Message Integration**: Sophisticated URL scheme encoding for iMessage persistence
+- **UI Framework**: Basic 4-button interface with dual presentation modes
+
+### Integration Status
+- **UI ↔ Command System**: Currently disconnected; UI uses hardcoded responses
+- **API Integration**: API client exists but not connected to UI actions
+- **Command Execution**: Parsing works but needs integration with WorkingMessagesViewController
+
+### Development Notes
 - Extensions run within Messages app context, not standalone
 - UI must handle both compact (strip) and expanded (full screen) modes
 - All functionality resides in Messages Extension target
 - Main app target serves only as container for App Store
+- Core architecture is solid but needs integration between parsing system and UI layer

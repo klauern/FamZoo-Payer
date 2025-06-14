@@ -4,7 +4,9 @@
       "Bash(mkdir:*)",
       "Bash(xcodebuild:*)",
       "Bash(timeout 30 xcodebuild:*)",
-      "Bash(timeout 60 xcodebuild:*)"
+      "Bash(timeout 60 xcodebuild:*)",
+      "Bash(rm:*)",
+      "Bash(find:*)"
     ],
     "deny": []
   }

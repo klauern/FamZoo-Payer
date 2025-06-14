@@ -22,8 +22,8 @@ class FamZooAPIClient {
         let response: APIResponse<AuthenticationResponse> = try await post("/auth/login", body: request)
         
         if let authData = response.data {
-            try await keychain.storeAuthToken(authData.accessToken)
-            try await keychain.storeRefreshToken(authData.refreshToken)
+            try keychain.storeAuthToken(authData.accessToken)
+            try keychain.storeRefreshToken(authData.refreshToken)
             return authData
         } else {
             throw NetworkError.invalidResponse
@@ -31,7 +31,7 @@ class FamZooAPIClient {
     }
     
     func refreshToken() async throws -> AuthenticationResponse {
-        guard let refreshToken = try await keychain.getRefreshToken() else {
+        guard let refreshToken = try keychain.getRefreshToken() else {
             throw NetworkError.unauthorized
         }
         
@@ -39,8 +39,8 @@ class FamZooAPIClient {
         let response: APIResponse<AuthenticationResponse> = try await post("/auth/refresh", body: request)
         
         if let authData = response.data {
-            try await keychain.storeAuthToken(authData.accessToken)
-            try await keychain.storeRefreshToken(authData.refreshToken)
+            try keychain.storeAuthToken(authData.accessToken)
+            try keychain.storeRefreshToken(authData.refreshToken)
             return authData
         } else {
             throw NetworkError.invalidResponse
@@ -162,7 +162,7 @@ class FamZooAPIClient {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         
         // Add authentication header
-        if let token = try await keychain.getAuthToken() {
+        if let token = try keychain.getAuthToken() {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
         
@@ -201,7 +201,7 @@ class FamZooAPIClient {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         
         // Add authentication header
-        if let token = try await keychain.getAuthToken() {
+        if let token = try keychain.getAuthToken() {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
         
