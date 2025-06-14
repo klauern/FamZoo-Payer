@@ -107,7 +107,7 @@ struct Transaction: Codable, Identifiable, Equatable {
     init(id: String = UUID().uuidString,
          type: TransactionType,
          amount: Decimal,
-         currency: String = "USD",
+         currency: String = AppConfig.defaultCurrency,
          description: String,
          fromAccountId: String? = nil,
          toAccountId: String? = nil,

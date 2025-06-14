@@ -145,7 +145,7 @@ struct MemberPreferences: Codable, Equatable {
     init(notificationsEnabled: Bool = true,
          emailNotifications: Bool = true,
          smsNotifications: Bool = false,
-         currency: String = "USD",
+         currency: String = AppConfig.defaultCurrency,
          timezone: String = TimeZone.current.identifier,
          language: String = "en",
          theme: String = "auto",

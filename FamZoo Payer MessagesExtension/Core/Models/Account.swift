@@ -45,7 +45,7 @@ struct Account: Codable, Identifiable, Equatable {
          name: String,
          type: AccountType,
          balance: Decimal = 0,
-         currency: String = "USD",
+         currency: String = AppConfig.defaultCurrency,
          ownerId: String,
          parentAccountId: String? = nil) {
         self.id = id

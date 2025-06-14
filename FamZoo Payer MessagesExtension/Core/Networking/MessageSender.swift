@@ -86,7 +86,7 @@ class MessageSender {
         
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
+        formatter.currencyCode = AppConfig.defaultCurrency
         layout.caption = formatter.string(from: balance.balance as NSDecimalNumber) ?? "$0.00"
         layout.subcaption = balance.accountName
         layout.imageTitle = "💰"
@@ -132,7 +132,7 @@ class MessageSender {
     
     private func createCommandURL(_ command: FamZooCommand) -> URL? {
         var components = URLComponents()
-        components.scheme = "famzoo"
+        components.scheme = AppConfig.messageScheme
         components.host = "command"
         
         var queryItems: [URLQueryItem] = [
@@ -152,7 +152,7 @@ class MessageSender {
     
     private func createResultURL(_ command: FamZooCommand, result: CommandResponse) -> URL? {
         var components = URLComponents()
-        components.scheme = "famzoo"
+        components.scheme = AppConfig.messageScheme
         components.host = "result"
         
         var queryItems: [URLQueryItem] = [
@@ -173,7 +173,7 @@ class MessageSender {
     
     private func createBalanceURL(_ balance: AccountBalanceResponse) -> URL? {
         var components = URLComponents()
-        components.scheme = "famzoo"
+        components.scheme = AppConfig.messageScheme
         components.host = "balance"
         
         components.queryItems = [
@@ -187,7 +187,7 @@ class MessageSender {
     
     private func createTransactionURL(_ transaction: Transaction) -> URL? {
         var components = URLComponents()
-        components.scheme = "famzoo"
+        components.scheme = AppConfig.messageScheme
         components.host = "transaction"
         
         components.queryItems = [
@@ -203,7 +203,7 @@ class MessageSender {
     
     private func createErrorURL(_ error: Error) -> URL? {
         var components = URLComponents()
-        components.scheme = "famzoo"
+        components.scheme = AppConfig.messageScheme
         components.host = "error"
         
         components.queryItems = [
@@ -236,7 +236,7 @@ class MessageSender {
     
     func parseCommandFromMessage(_ message: MSMessage) -> FamZooCommand? {
         guard let url = message.url,
-              url.scheme == "famzoo",
+              url.scheme == AppConfig.messageScheme,
               url.host == "command" else {
             return nil
         }
