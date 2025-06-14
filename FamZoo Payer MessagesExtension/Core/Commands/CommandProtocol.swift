@@ -143,7 +143,7 @@ extension NumberFormatter {
     static let currency: NumberFormatter = {
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
+        formatter.currencyCode = AppConfig.defaultCurrency
         return formatter
     }()
 }

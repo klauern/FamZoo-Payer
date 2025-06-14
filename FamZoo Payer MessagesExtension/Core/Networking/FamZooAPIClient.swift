@@ -6,7 +6,7 @@ class FamZooAPIClient {
     private let retryManager: NetworkRetryManager
     private let keychain: KeychainManager
     
-    init(baseURL: String = "https://api.famzoo.com/v1",
+    init(baseURL: String = AppConfig.apiBaseURL,
          session: URLSession = .shared,
          keychain: KeychainManager = KeychainManager()) {
         self.baseURL = URL(string: baseURL)!
